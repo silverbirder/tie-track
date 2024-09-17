@@ -4,8 +4,9 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import { getServerAuthSession } from "@/server/auth";
 import AuthSessionProvider from "./components/AuthSessionProvider";
+import { getServerSession } from "next-auth";
+import authOptions from "./api/auth/[...nextauth]/authOptions";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await getServerAuthSession();
+  const session = await getServerSession(authOptions);
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <AuthSessionProvider session={session}>
