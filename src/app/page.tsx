@@ -5,6 +5,7 @@ import { useChat } from "ai/react";
 import type { PlaybackState, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { api } from "@/trpc/react";
 
 export default function Home() {
   const session = useSession();
@@ -31,7 +32,8 @@ function SpotifySearch({ sdk }: { sdk: SpotifyApi }) {
   const [playbackState, setPlaybackState] = useState<PlaybackState | null>(
     null,
   );
-  const { messages, handleSubmit, setInput } = useChat();
+  const { messages, handleSubmit, setInput, isLoading } = useChat();
+  const mutateCreateTieUpInfo = api.music.createTieUpInfo.useMutation();
 
   useEffect(() => {
     void sdk.player.getCurrentlyPlayingTrack().then((data) => {
@@ -39,64 +41,79 @@ function SpotifySearch({ sdk }: { sdk: SpotifyApi }) {
     });
   }, [sdk]);
 
-  if (!playbackState?.item) {
+  const item = playbackState?.item;
+
+  const track = item && "album" in item ? item : null;
+  const artistName = track?.artists[0]?.name ?? "";
+  const songName = track?.name ?? "";
+
+  const { data: tieUpInfo } = api.music.getTieUpInfo.useQuery(
+    { artistName, songName },
+    {
+      enabled: !!artistName && !!songName,
+    },
+  );
+
+  const handleSendToOpenAI = () => {
+    const message = JSON.stringify({ artistName, songName });
+    setInput(message);
+    handleSubmit();
+  };
+
+  useEffect(() => {
+    if (!isLoading && messages.length > 0 && artistName && songName) {
+      const tieUpInfoFromMessages = messages
+        .filter((message) => message.role !== "user")
+        .map((message) => message.content.toString())
+        .join(",");
+      console.log({ tieUpInfoFromMessages });
+      mutateCreateTieUpInfo.mutate({
+        artistName,
+        songName,
+        tieUpInfo: tieUpInfoFromMessages,
+      });
+    }
+  }, [isLoading, messages, artistName, songName, mutateCreateTieUpInfo]);
+
+  if (!track) {
     return <div>Loading...</div>;
   }
 
-  const item = playbackState.item;
+  const albumImageUrl = track.album.images[0]?.url;
 
-  if (item && "album" in item) {
-    const track = item;
-    const albumImageUrl = track.album.images[0]?.url;
-    const artistName = track.artists[0]?.name;
-    const trackName = track.name;
-
-    const handleSendToOpenAI = () => {
-      const message = `アーティスト名: "${artistName}", 曲名: "${trackName}".`;
-      setInput(message);
-      handleSubmit();
-    };
-
-    return (
+  return (
+    <div>
+      <h1>Now Playing</h1>
+      {albumImageUrl && (
+        <img
+          src={albumImageUrl}
+          alt={`Album cover of ${songName}`}
+          width={300}
+        />
+      )}
+      <p>
+        <strong>Track:</strong> {songName}
+      </p>
+      <p>
+        <strong>Artist:</strong> {artistName}
+      </p>
+      {tieUpInfo ? (
+        <p>
+          <strong>Tie-Up Info:</strong>
+          {tieUpInfo.tieUpInfo ?? "タイアップ情報は見つかりませんでした。"}
+        </p>
+      ) : (
+        <p>Loading tie-up info...</p>
+      )}
+      <button onClick={handleSendToOpenAI}>Send to OpenAI</button>
       <div>
-        <h1>Now Playing</h1>
-        {albumImageUrl && (
-          <img
-            src={albumImageUrl}
-            alt={`Album cover of ${trackName}`}
-            width={300}
-          />
-        )}
-        <p>
-          <strong>Track:</strong> {trackName}
-        </p>
-        <p>
-          <strong>Artist:</strong> {artistName}
-        </p>
-        <button onClick={handleSendToOpenAI}>Send to OpenAI</button>
-        <div>
-          {messages.map((message) => (
-            <div key={message.id}>
-              <div>{message.role}</div>
-              <div>{message.content}</div>
-            </div>
-          ))}
-        </div>
+        {messages.map((message) => (
+          <div key={message.id}>
+            <div>{message.role}</div>
+            <div>{message.content}</div>
+          </div>
+        ))}
       </div>
-    );
-  } else if (item && "show" in item) {
-    const episode = item;
-    const episodeName = episode.name;
-
-    return (
-      <div>
-        <h1>Now Playing</h1>
-        <p>
-          <strong>Episode:</strong> {episodeName}
-        </p>
-      </div>
-    );
-  }
-
-  return <div>No media is currently playing.</div>;
+    </div>
+  );
 }
