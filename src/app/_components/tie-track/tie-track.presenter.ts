@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo } from "react";
 import type { PlaybackState } from "@spotify/web-api-ts-sdk";
 
@@ -17,5 +15,6 @@ export const useTieTrackPresenter = (playbackState: PlaybackState | null) => {
     albumImageUrl,
     songName,
     artistName,
+    isTrackAvailable: !!track,
   };
 };

@@ -1,16 +1,17 @@
 "use client";
 
 import { useTieTrackPresenter } from "./tie-track.presenter";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { ChevronDown, ChevronUp, LogOut, RefreshCw, Send } from "lucide-react";
+import { LogOut, RefreshCw, Send, Loader2 } from "lucide-react";
 import type { PlaybackState } from "@spotify/web-api-ts-sdk";
 import type { Message } from "ai";
 
 type Props = {
+  chatLoading: boolean;
   playbackState: PlaybackState | null;
   tieUpInfo?: { tieUpInfo: string | null } | null;
   handleSignOut: () => void;
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export const TieTrackComponent = memo(function TieTrackComponent({
+  chatLoading,
   playbackState,
   tieUpInfo,
   handleSignOut,
@@ -29,9 +31,8 @@ export const TieTrackComponent = memo(function TieTrackComponent({
   tieUpInfoLoading,
   fetchCurrentlyPlayingTrack,
 }: Props) {
-  const { albumImageUrl, songName, artistName } =
+  const { albumImageUrl, songName, artistName, isTrackAvailable } =
     useTieTrackPresenter(playbackState);
-  const [showTieUp, setShowTieUp] = useState(false);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 p-4">
@@ -72,41 +73,45 @@ export const TieTrackComponent = memo(function TieTrackComponent({
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
-          <Button
-            onClick={() => setShowTieUp(!showTieUp)}
-            variant="outline"
-            className="w-full justify-between"
-          >
-            タイアップ情報を{showTieUp ? "隠す" : "表示"}
-            {showTieUp ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </Button>
-          {showTieUp && (
-            <div className="space-y-2">
-              {tieUpInfoLoading ? (
-                <Skeleton className="h-20 w-full" />
-              ) : tieUpInfo?.tieUpInfo ? (
-                <p className="text-sm">{tieUpInfo.tieUpInfo}</p>
-              ) : (
-                <p className="text-sm text-gray-500">
-                  タイアップ情報は見つかりませんでした。
-                </p>
-              )}
-              <Button onClick={handleSendToOpenAI} className="w-full">
-                <Send className="mr-2 h-4 w-4" />
-                Send to OpenAI
-              </Button>
-            </div>
-          )}
-          {messages.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <h3 className="font-semibold">Messages:</h3>
-              {messages.map((message) => (
-                <div key={message.id} className="rounded bg-gray-100 p-2">
-                  <div className="font-medium">{message.role}</div>
-                  <div className="text-sm">{message.content}</div>
+          {isTrackAvailable && (
+            <>
+              <div className="space-y-2">
+                {tieUpInfoLoading ? (
+                  <Skeleton className="h-20 w-full" />
+                ) : tieUpInfo?.tieUpInfo ? (
+                  <p className="text-sm">{tieUpInfo.tieUpInfo}</p>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    タイアップ情報は見つかりませんでした。
+                  </p>
+                )}
+                {!tieUpInfoLoading && !tieUpInfo?.tieUpInfo && (
+                  <Button
+                    onClick={handleSendToOpenAI}
+                    className="w-full"
+                    disabled={chatLoading}
+                  >
+                    {chatLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="mr-2 h-4 w-4" />
+                    )}
+                    {chatLoading ? "Sending..." : "Send to OpenAI"}
+                  </Button>
+                )}
+              </div>
+              {messages.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {messages
+                    .filter((message) => message.role === "system")
+                    .map((message) => (
+                      <div key={message.id} className="rounded bg-gray-100 p-2">
+                        <div className="text-sm">{message.content}</div>
+                      </div>
+                    ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

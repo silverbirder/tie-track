@@ -16,7 +16,11 @@ export const useTieTrackFacade = () => {
   const albumImageUrl = item?.album?.images[0]?.url;
   const songName = playbackState?.item?.name ?? "";
 
-  const { messages, handleSubmit, setInput } = useChat({
+  const {
+    messages,
+    append,
+    isLoading: chatLoading,
+  } = useChat({
     onFinish: (message) => {
       mutateCreateTieUpInfo.mutate({
         artistName,
@@ -39,11 +43,10 @@ export const useTieTrackFacade = () => {
     setPlaybackState(playbackState);
   }, []);
 
-  const handleSendToOpenAI = useCallback(() => {
+  const handleSendToOpenAI = useCallback(async () => {
     const message = JSON.stringify({ artistName, songName });
-    setInput(message);
-    handleSubmit();
-  }, [artistName, songName, handleSubmit, setInput]);
+    await append({ role: "user", content: message });
+  }, [artistName, songName, append]);
 
   const handleSignIn = useCallback(() => signIn("spotify"), []);
   const handleSignOut = useCallback(() => signOut(), []);
@@ -59,6 +62,7 @@ export const useTieTrackFacade = () => {
     songName,
     messages,
     handleSendToOpenAI,
+    chatLoading,
     fetchCurrentlyPlayingTrack,
   };
 };

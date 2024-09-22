@@ -13,6 +13,7 @@ export const TieTrackContainer = () => {
     tieUpInfo,
     handleSignOut,
     handleSendToOpenAI,
+    chatLoading,
     messages,
     tieUpInfoLoading,
     fetchCurrentlyPlayingTrack,
@@ -42,6 +43,7 @@ export const TieTrackContainer = () => {
 
   return (
     <TieTrackComponent
+      chatLoading={chatLoading}
       playbackState={playbackState}
       tieUpInfo={tieUpInfo}
       handleSignOut={handleSignOut}
