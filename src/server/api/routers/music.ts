@@ -30,7 +30,8 @@ export const musicRouter = createTRPCRouter({
 
       return result.length > 0 ? result[0] : null;
     }),
-  createTieUpInfo: publicProcedure
+
+  upsertTieUpInfo: publicProcedure
     .input(
       z.object({
         artistName: z.string(),
@@ -49,12 +50,24 @@ export const musicRouter = createTRPCRouter({
           ),
         )
         .limit(1);
+
       if (existing.length > 0) {
-        return {
-          success: false,
-          message: "This song and artist combination already exists.",
-        };
+        await db
+          .update(musicTable)
+          .set({
+            tieUpInfo: input.tieUpInfo ?? null,
+          })
+          .where(
+            and(
+              eq(musicTable.artistName, input.artistName),
+              eq(musicTable.songName, input.songName),
+            ),
+          );
+
+        return { success: true, message: "Data updated successfully." };
       }
+
+      // 新しいデータを挿入
       await db.insert(musicTable).values({
         artistName: input.artistName,
         songName: input.songName,

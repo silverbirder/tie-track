@@ -22,14 +22,14 @@ export const useTieTrackFacade = () => {
     };
   }, [playbackState]);
 
-  const mutateCreateTieUpInfo = api.music.createTieUpInfo.useMutation();
+  const mutateUpsertTieUpInfo = api.music.upsertTieUpInfo.useMutation();
   const {
     append,
     isLoading: chatLoading,
     setMessages,
   } = useChat({
     onFinish: (message) => {
-      mutateCreateTieUpInfo.mutate(
+      mutateUpsertTieUpInfo.mutate(
         {
           artistName,
           songName,
@@ -69,6 +69,18 @@ export const useTieTrackFacade = () => {
     await append({ role: "user", content: message });
   }, [artistName, songName, append]);
 
+  const handleUpdateTieUpInfo = useCallback(
+    async (newTieUpInfo: string) => {
+      mutateUpsertTieUpInfo.mutate({
+        artistName,
+        songName,
+        tieUpInfo: newTieUpInfo,
+      });
+      await refetch();
+    },
+    [artistName, songName, mutateUpsertTieUpInfo, refetch],
+  );
+
   const handleSignIn = useCallback(() => signIn("spotify"), []);
   const handleSignOut = useCallback(() => signOut(), []);
 
@@ -82,6 +94,7 @@ export const useTieTrackFacade = () => {
     artistName,
     songName,
     handleSendToOpenAI,
+    handleUpdateTieUpInfo,
     chatLoading,
     fetchCurrentlyPlayingTrack,
     playbackLoading,

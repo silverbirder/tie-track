@@ -48,6 +48,10 @@ const config = {
       },
     ],
   },
-  ignorePatterns: ["src/app/api/auth", "src/lib/spotify-sdk"],
+  ignorePatterns: [
+    "src/app/api/auth",
+    "src/lib/spotify-sdk",
+    "src/components/ui",
+  ],
 };
 module.exports = config;

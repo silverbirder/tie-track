@@ -1,14 +1,23 @@
 "use client";
 
 import { useTieTrackPresenter } from "./tie-track.presenter";
-import { memo, useState, useEffect } from "react";
+import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { LogOut, RefreshCw, Send, Loader2, Music } from "lucide-react";
+import {
+  LogOut,
+  RefreshCw,
+  Send,
+  Loader2,
+  Music,
+  Edit,
+  Save,
+} from "lucide-react";
 import type { PlaybackState } from "@spotify/web-api-ts-sdk";
 import { motion, AnimatePresence } from "framer-motion";
+import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   chatLoading: boolean;
@@ -17,6 +26,7 @@ type Props = {
   tieUpInfo?: { tieUpInfo: string | null } | null;
   handleSignOut: () => void;
   handleSendToOpenAI: () => void;
+  handleUpdateTieUpInfo: (newTieUpInfo: string) => Promise<void>;
   tieUpInfoLoading: boolean;
   fetchCurrentlyPlayingTrack: () => void;
 };
@@ -28,14 +38,26 @@ export const TieTrackComponent = memo(function TieTrackComponent({
   tieUpInfo,
   handleSignOut,
   handleSendToOpenAI,
+  handleUpdateTieUpInfo,
   tieUpInfoLoading,
   fetchCurrentlyPlayingTrack,
 }: Props) {
   const { albumImageUrl, songName, artistName, isTrackAvailable } =
     useTieTrackPresenter(playbackState);
 
-  const handleFetchTrack = () => {
-    fetchCurrentlyPlayingTrack();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTieUpInfo, setEditedTieUpInfo] = useState(
+    tieUpInfo?.tieUpInfo ?? "",
+  );
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setEditedTieUpInfo(tieUpInfo?.tieUpInfo ?? "");
+  };
+
+  const handleSave = async () => {
+    await handleUpdateTieUpInfo(editedTieUpInfo);
+    setIsEditing(false);
   };
 
   return (
@@ -60,7 +82,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
           <CardContent className="flex h-[calc(100%-4rem)] flex-col justify-between">
             <div className="space-y-4">
               <Button
-                onClick={handleFetchTrack}
+                onClick={() => fetchCurrentlyPlayingTrack()}
                 className="w-full transform bg-green-500 text-white transition-all duration-300 ease-in-out hover:scale-105 hover:bg-green-600"
                 disabled={playbackLoading}
               >
@@ -71,7 +93,6 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                 )}
                 再生中の曲を確認
               </Button>
-
               <AnimatePresence>
                 {isTrackAvailable && (
                   <motion.div
@@ -122,15 +143,37 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                     <div className="space-y-2">
                       {tieUpInfoLoading ? (
                         <Skeleton className="h-20 w-full" />
+                      ) : isEditing ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editedTieUpInfo}
+                            onChange={(e) => setEditedTieUpInfo(e.target.value)}
+                            className="w-full"
+                            rows={3}
+                          />
+                          <Button onClick={handleSave} className="w-full">
+                            <Save className="mr-2 h-4 w-4" />
+                            変更を保存
+                          </Button>
+                        </div>
                       ) : tieUpInfo?.tieUpInfo ? (
-                        <motion.p
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4, duration: 0.3 }}
-                          className="h-20 text-sm"
-                        >
-                          {tieUpInfo.tieUpInfo}
-                        </motion.p>
+                        <div className="flex items-start justify-between">
+                          <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4, duration: 0.3 }}
+                            className="h-20 text-sm"
+                          >
+                            {tieUpInfo.tieUpInfo}
+                          </motion.p>
+                          <Button
+                            onClick={handleEdit}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </div>
                       ) : (
                         <motion.p
                           initial={{ opacity: 0, y: 20 }}

@@ -15,6 +15,7 @@ export const TieTrackContainer = () => {
     tieUpInfo,
     handleSignOut,
     handleSendToOpenAI,
+    handleUpdateTieUpInfo,
     chatLoading,
     tieUpInfoLoading,
     fetchCurrentlyPlayingTrack,
@@ -67,6 +68,7 @@ export const TieTrackContainer = () => {
       tieUpInfo={tieUpInfo}
       handleSignOut={handleSignOut}
       handleSendToOpenAI={handleSendToOpenAI}
+      handleUpdateTieUpInfo={handleUpdateTieUpInfo}
       tieUpInfoLoading={tieUpInfoLoading}
       fetchCurrentlyPlayingTrack={fetchCurrentlyPlayingTrack}
     />
