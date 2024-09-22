@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { signIn, signOut } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { useChat } from "ai/react";
@@ -11,37 +11,51 @@ export const useTieTrackFacade = () => {
   const [playbackState, setPlaybackState] = useState<PlaybackState | null>(
     null,
   );
-  const item = playbackState?.item as Track;
-  const artistName = item?.artists[0]?.name ?? "";
-  const albumImageUrl = item?.album?.images[0]?.url;
-  const songName = playbackState?.item?.name ?? "";
+  const { artistName, albumImageUrl, songName } = useMemo(() => {
+    const item = playbackState?.item as Track | undefined;
+    return {
+      artistName: item?.artists[0]?.name ?? "",
+      albumImageUrl: item?.album?.images[0]?.url ?? "",
+      songName: item?.name ?? "",
+    };
+  }, [playbackState]);
 
+  const mutateCreateTieUpInfo = api.music.createTieUpInfo.useMutation();
   const {
-    messages,
     append,
     isLoading: chatLoading,
+    setMessages,
   } = useChat({
     onFinish: (message) => {
-      mutateCreateTieUpInfo.mutate({
-        artistName,
-        songName,
-        tieUpInfo: message.content,
-      });
+      mutateCreateTieUpInfo.mutate(
+        {
+          artistName,
+          songName,
+          tieUpInfo: message.content,
+        },
+        {
+          onSuccess: () => {
+            void refetch();
+          },
+        },
+      );
     },
   });
 
-  const mutateCreateTieUpInfo = api.music.createTieUpInfo.useMutation();
-
-  const { data: tieUpInfo, isLoading: tieUpInfoLoading } =
-    api.music.getTieUpInfo.useQuery(
-      { artistName, songName },
-      { enabled: !!artistName && !!songName },
-    );
+  const {
+    data: tieUpInfo,
+    isLoading: tieUpInfoLoading,
+    refetch,
+  } = api.music.getTieUpInfo.useQuery(
+    { artistName, songName },
+    { enabled: !!artistName && !!songName },
+  );
 
   const fetchCurrentlyPlayingTrack = useCallback(async () => {
     const playbackState = await sdk.player.getCurrentlyPlayingTrack();
     setPlaybackState(playbackState);
-  }, []);
+    setMessages([]);
+  }, [setMessages]);
 
   const handleSendToOpenAI = useCallback(async () => {
     const message = JSON.stringify({ artistName, songName });
@@ -60,7 +74,6 @@ export const useTieTrackFacade = () => {
     albumImageUrl,
     artistName,
     songName,
-    messages,
     handleSendToOpenAI,
     chatLoading,
     fetchCurrentlyPlayingTrack,

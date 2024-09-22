@@ -4,9 +4,10 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
-import AuthSessionProvider from "./components/AuthSessionProvider";
+import AuthSessionProvider from "./_components/AuthSessionProvider";
 import { getServerSession } from "next-auth";
 import authOptions from "./api/auth/[...nextauth]/authOptions";
+import { Footer } from "./_components/Footer";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -19,10 +20,13 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const session = await getServerSession(authOptions);
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="ja" className={`${GeistSans.variable} h-full`}>
       <AuthSessionProvider session={session}>
-        <body>
-          <TRPCReactProvider>{children}</TRPCReactProvider>
+        <body className="flex h-full flex-col">
+          <main className="flex-1 overflow-auto">
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+          </main>
+          <Footer />
         </body>
       </AuthSessionProvider>
     </html>

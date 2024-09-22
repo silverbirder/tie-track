@@ -1,14 +1,14 @@
 "use client";
 
 import { useTieTrackPresenter } from "./tie-track.presenter";
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
-import { LogOut, RefreshCw, Send, Loader2 } from "lucide-react";
+import { LogOut, RefreshCw, Send, Loader2, Music } from "lucide-react";
 import type { PlaybackState } from "@spotify/web-api-ts-sdk";
-import type { Message } from "ai";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   chatLoading: boolean;
@@ -16,7 +16,6 @@ type Props = {
   tieUpInfo?: { tieUpInfo: string | null } | null;
   handleSignOut: () => void;
   handleSendToOpenAI: () => void;
-  messages: Message[];
   tieUpInfoLoading: boolean;
   fetchCurrentlyPlayingTrack: () => void;
 };
@@ -27,94 +26,187 @@ export const TieTrackComponent = memo(function TieTrackComponent({
   tieUpInfo,
   handleSignOut,
   handleSendToOpenAI,
-  messages,
   tieUpInfoLoading,
   fetchCurrentlyPlayingTrack,
 }: Props) {
   const { albumImageUrl, songName, artistName, isTrackAvailable } =
     useTieTrackPresenter(playbackState);
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (playbackState !== null) {
+      setIsLoading(false);
+    }
+  }, [playbackState]);
+
+  const handleFetchTrack = () => {
+    setIsLoading(true);
+    fetchCurrentlyPlayingTrack();
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center text-xl font-bold">
-            Spotify TieTrack
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-4">
-            {albumImageUrl ? (
-              <Image
-                src={albumImageUrl}
-                alt={`Album cover of ${songName}`}
-                width={100}
-                height={100}
-                className="rounded-lg shadow-lg"
-              />
-            ) : (
-              <Skeleton className="h-[100px] w-[100px] rounded-lg" />
-            )}
-            <div>
-              <h2 className="font-semibold">
-                {songName || "No track playing"}
-              </h2>
-              <p className="text-sm text-gray-600">
-                {artistName || "Unknown artist"}
-              </p>
-            </div>
-          </div>
-          <div className="flex space-x-2">
-            <Button onClick={fetchCurrentlyPlayingTrack} className="flex-1">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh Track
-            </Button>
-            <Button onClick={handleSignOut} variant="outline" size="icon">
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-          {isTrackAvailable && (
-            <>
-              <div className="space-y-2">
-                {tieUpInfoLoading ? (
-                  <Skeleton className="h-20 w-full" />
-                ) : tieUpInfo?.tieUpInfo ? (
-                  <p className="text-sm">{tieUpInfo.tieUpInfo}</p>
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="h-[500px] w-[320px] overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-center text-xl font-bold">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                Spotify タイアップ検索
+              </motion.div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex h-[calc(100%-4rem)] flex-col justify-between">
+            <div className="space-y-4">
+              <Button
+                onClick={handleFetchTrack}
+                className="w-full transform bg-green-500 text-white transition-all duration-300 ease-in-out hover:scale-105 hover:bg-green-600"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <p className="text-sm text-gray-500">
-                    タイアップ情報は見つかりませんでした。
-                  </p>
+                  <RefreshCw className="mr-2 h-4 w-4" />
                 )}
-                {!tieUpInfoLoading && !tieUpInfo?.tieUpInfo && (
-                  <Button
-                    onClick={handleSendToOpenAI}
-                    className="w-full"
-                    disabled={chatLoading}
+                再生中の曲を確認
+              </Button>
+
+              <AnimatePresence>
+                {isTrackAvailable && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4"
                   >
-                    {chatLoading ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="mr-2 h-4 w-4" />
-                    )}
-                    {chatLoading ? "Sending..." : "Send to OpenAI"}
-                  </Button>
-                )}
-              </div>
-              {messages.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <h3 className="font-semibold">Messages:</h3>
-                  {messages.map((message) => (
-                    <div key={message.id} className="rounded bg-gray-100 p-2">
-                      <div className="font-medium">{message.role}</div>
-                      <div className="text-sm">{message.content}</div>
+                    <div className="flex items-center space-x-4">
+                      {albumImageUrl ? (
+                        <motion.div
+                          initial={{ rotate: -180, opacity: 0 }}
+                          animate={{ rotate: 0, opacity: 1 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          <Image
+                            src={albumImageUrl}
+                            alt={`Album cover of ${songName}`}
+                            width={80}
+                            height={80}
+                            className="rounded-lg shadow-lg"
+                          />
+                        </motion.div>
+                      ) : (
+                        <Skeleton className="h-[80px] w-[80px] rounded-lg" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <motion.h2
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.2, duration: 0.3 }}
+                          className="truncate font-semibold"
+                        >
+                          {songName || "No track playing"}
+                        </motion.h2>
+                        <motion.p
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.3, duration: 0.3 }}
+                          className="truncate text-sm text-gray-600"
+                        >
+                          {artistName || "Unknown artist"}
+                        </motion.p>
+                      </div>
                     </div>
-                  ))}
-                </div>
+
+                    <div className="space-y-2">
+                      {tieUpInfoLoading ? (
+                        <Skeleton className="h-20 w-full" />
+                      ) : tieUpInfo?.tieUpInfo ? (
+                        <motion.p
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4, duration: 0.3 }}
+                          className="h-20 text-sm"
+                        >
+                          {tieUpInfo.tieUpInfo}
+                        </motion.p>
+                      ) : (
+                        <motion.p
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4, duration: 0.3 }}
+                          className="text-sm text-gray-500"
+                        >
+                          タイアップ情報は見つかりませんでした。
+                        </motion.p>
+                      )}
+                      {!tieUpInfoLoading && !tieUpInfo?.tieUpInfo && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.5, duration: 0.3 }}
+                        >
+                          <Button
+                            onClick={handleSendToOpenAI}
+                            className="w-full transform transition-all duration-300 ease-in-out hover:scale-105"
+                            disabled={chatLoading}
+                          >
+                            {chatLoading ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Send className="mr-2 h-4 w-4" />
+                            )}
+                            {chatLoading ? "送信中..." : "OpenAIに問い合わせ"}
+                          </Button>
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {!isTrackAvailable && !isLoading && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  className="flex flex-col items-center justify-center space-y-2 py-8"
+                >
+                  <Music className="h-12 w-12 text-gray-400" />
+                  <p className="text-center text-gray-500">
+                    再生中の曲がありません。
+                  </p>
+                </motion.div>
               )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.3 }}
+              className="pt-4 text-center"
+            >
+              <Button
+                onClick={handleSignOut}
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 transition-colors duration-300 hover:text-gray-700"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                ログアウト
+              </Button>
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 });
