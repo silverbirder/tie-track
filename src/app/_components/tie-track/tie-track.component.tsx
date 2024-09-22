@@ -102,13 +102,13 @@ export const TieTrackComponent = memo(function TieTrackComponent({
               </div>
               {messages.length > 0 && (
                 <div className="mt-4 space-y-2">
-                  {messages
-                    .filter((message) => message.role === "system")
-                    .map((message) => (
-                      <div key={message.id} className="rounded bg-gray-100 p-2">
-                        <div className="text-sm">{message.content}</div>
-                      </div>
-                    ))}
+                  <h3 className="font-semibold">Messages:</h3>
+                  {messages.map((message) => (
+                    <div key={message.id} className="rounded bg-gray-100 p-2">
+                      <div className="font-medium">{message.role}</div>
+                      <div className="text-sm">{message.content}</div>
+                    </div>
+                  ))}
                 </div>
               )}
             </>
