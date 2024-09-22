@@ -11,6 +11,8 @@ export const useTieTrackFacade = () => {
   const [playbackState, setPlaybackState] = useState<PlaybackState | null>(
     null,
   );
+  const [playbackLoading, setPlaybackLoading] = useState(false);
+
   const { artistName, albumImageUrl, songName } = useMemo(() => {
     const item = playbackState?.item as Track | undefined;
     return {
@@ -52,9 +54,14 @@ export const useTieTrackFacade = () => {
   );
 
   const fetchCurrentlyPlayingTrack = useCallback(async () => {
-    const playbackState = await sdk.player.getCurrentlyPlayingTrack();
-    setPlaybackState(playbackState);
-    setMessages([]);
+    setPlaybackLoading(true);
+    try {
+      const playbackState = await sdk.player.getCurrentlyPlayingTrack();
+      setPlaybackState(playbackState);
+      setMessages([]);
+    } finally {
+      setPlaybackLoading(false);
+    }
   }, [setMessages]);
 
   const handleSendToOpenAI = useCallback(async () => {
@@ -77,5 +84,6 @@ export const useTieTrackFacade = () => {
     handleSendToOpenAI,
     chatLoading,
     fetchCurrentlyPlayingTrack,
+    playbackLoading,
   };
 };

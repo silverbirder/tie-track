@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 type Props = {
   chatLoading: boolean;
   playbackState: PlaybackState | null;
+  playbackLoading: boolean;
   tieUpInfo?: { tieUpInfo: string | null } | null;
   handleSignOut: () => void;
   handleSendToOpenAI: () => void;
@@ -23,6 +24,7 @@ type Props = {
 export const TieTrackComponent = memo(function TieTrackComponent({
   chatLoading,
   playbackState,
+  playbackLoading,
   tieUpInfo,
   handleSignOut,
   handleSendToOpenAI,
@@ -32,16 +34,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
   const { albumImageUrl, songName, artistName, isTrackAvailable } =
     useTieTrackPresenter(playbackState);
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (playbackState !== null) {
-      setIsLoading(false);
-    }
-  }, [playbackState]);
-
   const handleFetchTrack = () => {
-    setIsLoading(true);
     fetchCurrentlyPlayingTrack();
   };
 
@@ -69,9 +62,9 @@ export const TieTrackComponent = memo(function TieTrackComponent({
               <Button
                 onClick={handleFetchTrack}
                 className="w-full transform bg-green-500 text-white transition-all duration-300 ease-in-out hover:scale-105 hover:bg-green-600"
-                disabled={isLoading}
+                disabled={playbackLoading}
               >
-                {isLoading ? (
+                {playbackLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <RefreshCw className="mr-2 h-4 w-4" />
@@ -173,7 +166,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                 )}
               </AnimatePresence>
 
-              {!isTrackAvailable && !isLoading && (
+              {!isTrackAvailable && !playbackLoading && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

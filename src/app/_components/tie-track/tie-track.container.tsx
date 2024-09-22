@@ -18,6 +18,7 @@ export const TieTrackContainer = () => {
     chatLoading,
     tieUpInfoLoading,
     fetchCurrentlyPlayingTrack,
+    playbackLoading,
   } = useTieTrackFacade();
 
   if (!session || session.status !== "authenticated") {
@@ -62,6 +63,7 @@ export const TieTrackContainer = () => {
     <TieTrackComponent
       chatLoading={chatLoading}
       playbackState={playbackState}
+      playbackLoading={playbackLoading}
       tieUpInfo={tieUpInfo}
       handleSignOut={handleSignOut}
       handleSendToOpenAI={handleSendToOpenAI}
