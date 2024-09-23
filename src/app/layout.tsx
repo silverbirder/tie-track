@@ -8,6 +8,7 @@ import AuthSessionProvider from "./_components/AuthSessionProvider";
 import { getServerSession } from "next-auth";
 import authOptions from "./api/auth/[...nextauth]/authOptions";
 import { Footer } from "./_components/Footer";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
   robots: {
@@ -40,6 +41,7 @@ export default async function RootLayout({
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </main>
           <Footer />
+          <Analytics />
         </body>
       </AuthSessionProvider>
     </html>
