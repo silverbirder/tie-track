@@ -5,6 +5,7 @@ import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import {
   LogOut,
@@ -17,7 +18,6 @@ import {
 } from "lucide-react";
 import type { PlaybackState } from "@spotify/web-api-ts-sdk";
 import { motion, AnimatePresence } from "framer-motion";
-import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   chatLoading: boolean;
@@ -67,7 +67,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="h-[500px] w-[320px] overflow-hidden">
+        <Card className="w-[320px] overflow-hidden">
           <CardHeader>
             <CardTitle className="text-center text-xl font-bold">
               <motion.div
@@ -82,7 +82,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
           <CardContent className="flex h-[calc(100%-4rem)] flex-col justify-between">
             <div className="space-y-4">
               <Button
-                onClick={() => fetchCurrentlyPlayingTrack()}
+                onClick={fetchCurrentlyPlayingTrack}
                 className="w-full transform bg-green-500 text-white transition-all duration-300 ease-in-out hover:scale-105 hover:bg-green-600"
                 disabled={playbackLoading}
               >
@@ -139,30 +139,34 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                         </motion.p>
                       </div>
                     </div>
-
                     <div className="space-y-2">
                       {tieUpInfoLoading ? (
-                        <Skeleton className="h-20 w-full" />
+                        <Skeleton className="h-30 w-full" />
                       ) : isEditing ? (
-                        <div className="space-y-2">
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="space-y-2"
+                        >
                           <Textarea
                             value={editedTieUpInfo}
                             onChange={(e) => setEditedTieUpInfo(e.target.value)}
-                            className="w-full"
-                            rows={3}
+                            className="h-30 w-full resize-none text-sm"
+                            placeholder="タイアップ情報を入力..."
                           />
                           <Button onClick={handleSave} className="w-full">
                             <Save className="mr-2 h-4 w-4" />
                             変更を保存
                           </Button>
-                        </div>
+                        </motion.div>
                       ) : tieUpInfo?.tieUpInfo ? (
                         <div className="flex items-start justify-between">
                           <motion.p
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.3 }}
-                            className="h-20 text-sm"
+                            className="h-30 pr-2 text-sm"
                           >
                             {tieUpInfo.tieUpInfo}
                           </motion.p>
@@ -223,7 +227,6 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                 </motion.div>
               )}
             </div>
-
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

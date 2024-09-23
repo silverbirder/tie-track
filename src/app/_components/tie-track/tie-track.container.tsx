@@ -25,7 +25,7 @@ export const TieTrackContainer = () => {
   if (!session || session.status !== "authenticated") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 p-4">
-        <Card className="h-[550px] w-[320px]">
+        <Card className="w-[320px]">
           <CardHeader>
             <CardTitle className="text-center text-xl font-bold">
               Spotify タイアップ検索
