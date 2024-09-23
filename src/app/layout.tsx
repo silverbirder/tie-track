@@ -8,6 +8,7 @@ import AuthSessionProvider from "./_components/AuthSessionProvider";
 import { getServerSession } from "next-auth";
 import authOptions from "./api/auth/[...nextauth]/authOptions";
 import { Footer } from "./_components/Footer";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default async function RootLayout({
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </main>
           <Footer />
+          {process.env.GA_ID && <GoogleAnalytics gaId={process.env.GA_ID} />}
           <Analytics />
         </body>
       </AuthSessionProvider>
