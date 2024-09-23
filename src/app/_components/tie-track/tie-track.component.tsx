@@ -91,7 +91,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                 ) : (
                   <RefreshCw className="mr-2 h-4 w-4" />
                 )}
-                再生中の曲を確認
+                再生中の曲を取得
               </Button>
               <AnimatePresence>
                 {isTrackAvailable && (

@@ -1,17 +1,49 @@
-"use client";
-
 import { useState, useCallback, useMemo } from "react";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { useChat } from "ai/react";
 import sdk from "@/lib/spotify-sdk/ClientInstance";
 import type { PlaybackState, Track } from "@spotify/web-api-ts-sdk";
+import { Music, Search, Edit } from "lucide-react";
 
 export const useTieTrackFacade = () => {
+  const session = useSession();
   const [playbackState, setPlaybackState] = useState<PlaybackState | null>(
     null,
   );
   const [playbackLoading, setPlaybackLoading] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const demoSlides = useMemo(
+    () => [
+      {
+        icon: Music,
+        title: "曲情報を取得",
+        description: "Spotifyで再生中の曲情報を簡単に取得できます。",
+      },
+      {
+        icon: Search,
+        title: "タイアップ情報を検索",
+        description: "AIを使って曲のタイアップ情報を自動で検索します。",
+      },
+      {
+        icon: Edit,
+        title: "情報を編集・保存",
+        description: "タイアップ情報を編集し、保存することができます。",
+      },
+    ],
+    [],
+  );
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % demoSlides.length);
+  }, [demoSlides.length]);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide(
+      (prev) => (prev - 1 + demoSlides.length) % demoSlides.length,
+    );
+  }, [demoSlides.length]);
 
   const { artistName, albumImageUrl, songName } = useMemo(() => {
     const item = playbackState?.item as Track | undefined;
@@ -85,6 +117,12 @@ export const useTieTrackFacade = () => {
   const handleSignOut = useCallback(() => signOut(), []);
 
   return {
+    session,
+    demoSlides,
+    currentSlide,
+    setCurrentSlide,
+    nextSlide,
+    prevSlide,
     handleSignIn,
     handleSignOut,
     playbackState,
