@@ -3,7 +3,13 @@
 import { useTieTrackPresenter } from "./tie-track.presenter";
 import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
@@ -15,6 +21,7 @@ import {
   Music,
   Edit,
   Save,
+  AlertCircle,
 } from "lucide-react";
 import type { PlaybackState } from "@spotify/web-api-ts-sdk";
 import { motion, AnimatePresence } from "framer-motion";
@@ -67,7 +74,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="w-[320px] min-h-[320px] overflow-hidden">
+        <Card className="min-h-[320px] w-[320px] overflow-hidden">
           <CardHeader>
             <CardTitle className="text-center text-xl font-bold">
               <motion.div
@@ -244,6 +251,12 @@ export const TieTrackComponent = memo(function TieTrackComponent({
               </Button>
             </motion.div>
           </CardContent>
+          <CardFooter>
+            <div className="flex w-full items-center justify-center text-xs text-gray-500">
+              <AlertCircle className="mr-1 h-3 w-3" />
+              AIからの回答は必ずしも正確ではありません
+            </div>
+          </CardFooter>
         </Card>
       </motion.div>
     </div>
