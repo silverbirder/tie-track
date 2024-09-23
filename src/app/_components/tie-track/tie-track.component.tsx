@@ -1,7 +1,7 @@
 "use client";
 
 import { useTieTrackPresenter } from "./tie-track.presenter";
-import { memo, useState } from "react";
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +16,7 @@ import Image from "next/image";
 import {
   LogOut,
   RefreshCw,
-  Send,
+  Search,
   Loader2,
   Music,
   Edit,
@@ -49,23 +49,23 @@ export const TieTrackComponent = memo(function TieTrackComponent({
   tieUpInfoLoading,
   fetchCurrentlyPlayingTrack,
 }: Props) {
-  const { albumImageUrl, songName, artistName, isTrackAvailable } =
-    useTieTrackPresenter(playbackState);
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTieUpInfo, setEditedTieUpInfo] = useState(
-    tieUpInfo?.tieUpInfo ?? "",
+  const {
+    albumImageUrl,
+    songName,
+    artistName,
+    isTrackAvailable,
+    isEditing,
+    editedTieUpInfo,
+    setEditedTieUpInfo,
+    handleEdit,
+    handleSave,
+    handleFetchTrack,
+  } = useTieTrackPresenter(
+    playbackState,
+    tieUpInfo ?? null,
+    handleUpdateTieUpInfo,
+    fetchCurrentlyPlayingTrack,
   );
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditedTieUpInfo(tieUpInfo?.tieUpInfo ?? "");
-  };
-
-  const handleSave = async () => {
-    await handleUpdateTieUpInfo(editedTieUpInfo);
-    setIsEditing(false);
-  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 p-4">
@@ -89,7 +89,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
           <CardContent className="flex h-[calc(100%-4rem)] flex-col justify-between">
             <div className="space-y-4">
               <Button
-                onClick={fetchCurrentlyPlayingTrack}
+                onClick={handleFetchTrack}
                 className="w-full transform bg-green-500 text-white transition-all duration-300 ease-in-out hover:scale-105 hover:bg-green-600"
                 disabled={playbackLoading}
               >
@@ -209,9 +209,11 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                             {chatLoading ? (
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             ) : (
-                              <Send className="mr-2 h-4 w-4" />
+                              <Search className="mr-2 h-4 w-4" />
                             )}
-                            {chatLoading ? "送信中..." : "OpenAIに問い合わせ"}
+                            {chatLoading
+                              ? "検索中..."
+                              : "タイアップ情報を検索する"}
                           </Button>
                         </motion.div>
                       )}
