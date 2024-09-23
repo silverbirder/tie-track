@@ -103,12 +103,18 @@ export const useTieTrackFacade = () => {
 
   const handleUpdateTieUpInfo = useCallback(
     async (newTieUpInfo: string) => {
-      mutateUpsertTieUpInfo.mutate({
-        artistName,
-        songName,
-        tieUpInfo: newTieUpInfo,
-      });
-      await refetch();
+      mutateUpsertTieUpInfo.mutate(
+        {
+          artistName,
+          songName,
+          tieUpInfo: newTieUpInfo,
+        },
+        {
+          onSuccess: () => {
+            void refetch();
+          },
+        },
+      );
     },
     [artistName, songName, mutateUpsertTieUpInfo, refetch],
   );
