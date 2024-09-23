@@ -148,7 +148,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                     </div>
                     <div className="space-y-2">
                       {tieUpInfoLoading ? (
-                        <Skeleton className="h-30 w-full" />
+                        <Skeleton className="h-32 w-full" />
                       ) : isEditing ? (
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
@@ -159,7 +159,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                           <Textarea
                             value={editedTieUpInfo}
                             onChange={(e) => setEditedTieUpInfo(e.target.value)}
-                            className="h-30 w-full resize-none text-sm"
+                            className="h-32 w-full resize-none text-sm"
                             placeholder="タイアップ情報を入力..."
                           />
                           <Button onClick={handleSave} className="w-full">
@@ -173,7 +173,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.3 }}
-                            className="h-30 pr-2 text-sm"
+                            className="h-32 pr-2 text-sm"
                           >
                             {tieUpInfo.tieUpInfo}
                           </motion.p>
