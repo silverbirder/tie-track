@@ -168,7 +168,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
                           </Button>
                         </motion.div>
                       ) : tieUpInfo?.tieUpInfo ? (
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between overflow-y-auto">
                           <motion.p
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
