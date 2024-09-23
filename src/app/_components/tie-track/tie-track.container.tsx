@@ -121,9 +121,9 @@ type DemoSlideProps = {
 const DemoSlide = memo(
   ({ icon: Icon, title, description, isActive }: DemoSlideProps) => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 20 }}
-      exit={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isActive ? 1 : 0 }}
+      exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className={`absolute inset-0 flex flex-col items-center justify-center p-4 ${
         isActive ? "" : "pointer-events-none"

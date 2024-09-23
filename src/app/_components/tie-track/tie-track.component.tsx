@@ -67,7 +67,7 @@ export const TieTrackComponent = memo(function TieTrackComponent({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="w-[320px] overflow-hidden">
+        <Card className="w-[320px] min-h-[320px] overflow-hidden">
           <CardHeader>
             <CardTitle className="text-center text-xl font-bold">
               <motion.div
