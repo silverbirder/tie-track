@@ -5,9 +5,11 @@ import { useChat } from "ai/react";
 import sdk from "@/lib/spotify-sdk/ClientInstance";
 import type { PlaybackState, Track } from "@spotify/web-api-ts-sdk";
 import { Music, Search, Edit } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export const useTieTrackFacade = () => {
   const session = useSession();
+  const router = useRouter();
   const [playbackState, setPlaybackState] = useState<PlaybackState | null>(
     null,
   );
@@ -85,16 +87,22 @@ export const useTieTrackFacade = () => {
     { enabled: !!artistName && !!songName },
   );
 
-  const fetchCurrentlyPlayingTrack = useCallback(async () => {
+  const fetchCurrentlyPlayingTrack = useCallback(() => {
     setPlaybackLoading(true);
     try {
-      const playbackState = await sdk.player.getCurrentlyPlayingTrack();
-      setPlaybackState(playbackState);
-      setMessages([]);
+      sdk.player
+        .getCurrentlyPlayingTrack()
+        .then((playbackState) => {
+          setPlaybackState(playbackState);
+          setMessages([]);
+        })
+        .catch(async () => {
+          await signOut();
+        });
     } finally {
       setPlaybackLoading(false);
     }
-  }, [setMessages]);
+  }, [router, setMessages]);
 
   const handleSendToOpenAI = useCallback(async () => {
     const message = JSON.stringify({ artistName, songName });
