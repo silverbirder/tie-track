@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="bg-gray-100 py-2">
       <div className="container mx-auto flex flex-row items-center justify-between px-4 text-xs">
         <p className="text-gray-600">
-          © 2024 silverbirder. All rights reserved.
+          © {new Date().getFullYear()} silverbirder. All rights reserved.
         </p>
         <Link
           href="https://forms.gle/Y6e5tntQqZYysJEaA"
