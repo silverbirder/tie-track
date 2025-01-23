@@ -7,13 +7,22 @@ export function Footer() {
         <p className="text-gray-600">
           © {new Date().getFullYear()} silverbirder. All rights reserved.
         </p>
-        <Link
-          href="https://forms.gle/Y6e5tntQqZYysJEaA"
-          target="_blank"
-          prefetch={false}
-        >
-          お問い合わせ
-        </Link>
+        <nav className="flex items-center gap-4">
+          <Link
+            href="https://forms.gle/Y6e5tntQqZYysJEaA"
+            target="_blank"
+            prefetch={false}
+          >
+            お問い合わせ
+          </Link>
+          <Link
+            href="https://sites.google.com/view/silverbirders-services"
+            target="_blank"
+            prefetch={false}
+          >
+            関連サービス
+          </Link>
+        </nav>
       </div>
     </footer>
   );
